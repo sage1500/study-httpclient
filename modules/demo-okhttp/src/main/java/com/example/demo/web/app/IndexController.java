@@ -16,7 +16,6 @@ import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.internal.ws.RealWebSocket.Streams;
 
 @Controller
 @RequestMapping("/")
@@ -33,28 +32,26 @@ public class IndexController {
         log.info("[!] hello");
 
         try {
-            OkHttpClient client = new OkHttpClient();
-
             // @formatter:off
-            Response response = client.newCall(
-                    new Request.Builder()
-                        .url("http://localhost:8080/api/hello")
-                        .addHeader("Authorization", Credentials.basic("clientId", "clientSecret"))
-                        .addHeader("Accept", "application/json")
-                        .addHeader("X-Forwarded-Proto", "https")
-                        .addHeader("X-Forwarded-Port", "8443")
-                        .addHeader("Host", "myhost")
-                        .post(new FormBody.Builder()
-                            .add("token", "token/123")
-                            .build())
-                        .build()
-                ).execute();
+            Request request = new Request.Builder()
+                    .url("http://localhost:8080/api/hello")
+                    .addHeader("Authorization", Credentials.basic("clientId", "clientSecret"))
+                    .addHeader("Accept", "application/json")
+                    .addHeader("X-Forwarded-Proto", "https")
+                    .addHeader("X-Forwarded-Port", "8443")
+                    .addHeader("Host", "myhost")
+                    .post(new FormBody.Builder()
+                        .add("token", "token/123")
+                        .build())
+                    .build();
             // @formatter:on
 
-            log.info("[!] Result:");
-            log.info(" code={}", response.code());
-            log.info(" contentType={}", response.body().contentType());
-            log.info(" body={}", response.body().string());
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                log.info("[!] Result:");
+                log.info(" code={}", response.code());
+                log.info(" contentType={}", response.body().contentType());
+                log.info(" body={}", response.body().string());
+            }
         } catch (Exception e) {
             log.error("[!] fail: {}", e.getMessage());
         }
@@ -73,7 +70,7 @@ public class IndexController {
         log.info("baseUrl: {}", urlbulder.path("/").build().toUri());
 
         log.info("Headers:");
-        for (var i = request.getHeaderNames(); i.hasNext(); ) {
+        for (var i = request.getHeaderNames(); i.hasNext();) {
             var name = i.next();
             for (var value : request.getHeaderValues(name)) {
                 log.info(" {}: {}", name, value);
