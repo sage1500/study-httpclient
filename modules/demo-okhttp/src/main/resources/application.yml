@@ -1,0 +1,14 @@
+spring.application.name: web
+server:
+  port: 8080
+  forward-headers-strategy: FRAMEWORK
+spring.main.banner-mode: off
+
+## ログレベル
+logging.level:
+  com.example: DEBUG
+
+## thymeleaf
+spring.thymeleaf:
+  mode: HTML
+
